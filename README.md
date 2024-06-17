@@ -34,16 +34,29 @@ Please don’t view this task as just completing the functional requirements. Th
 
 
 # Operating instructions
-
-1 - install module
-2 - go here: `/admin/people` check list of users
-3 - go here: `reqresimport/fetch-json` and adjust "parameter value" to `2`
-4 - click `send` - you should see a table of six retrieved entries starting with `michael.lawson@reqres.in`
-5 - uncheck "preview option" and click `send`
-6 - go back to `/admin/people` and you should see six new user accounts.
-7 - call up a terminal window and sh into the web server
-8 - type `drush mim reqres_user_data` and hit return
-9 - go back to `/admin/people` and you should see six new user accounts, these will have an image saved against `field_reqres_avatar_image`.
-10 - you may need to adjust visibility of fields here: `/admin/config/people/accounts/form-display` to make sure all of the `field_reqres_*` fields are visible on the form.
+1. Install the module.
+2. Go to `/admin/people` and check the list of users.
+3. Go to `reqresimport/fetch-json` and adjust the "parameter value" to `2`.
+4. Click "send" - you should see a table of six retrieved entries starting with `michael.lawson@reqres.in`.
+5. Uncheck the "preview option" and click "send".
+6. Go back to `/admin/people` and you should see six new user accounts.
+7. Call up a terminal window and sh into the web server.
+8. Type `drush mim reqres_user_data` and hit return.
+9. Go back to `/admin/people` and you should see six new user accounts. These will have an image saved against `field_reqres_avatar_image`.
+10. You may need to adjust the visibility of fields here: `/admin/config/people/accounts/form-display` to make sure all of the `field_reqres_*` fields are visible on the form.
 
 The automated tests are not finished. Any advice you can give would be much appreciated.
+
+## Patch instructions
+
+Insert this in the `composer.json` file under `extra`:
+
+``
+"extra": {
+    "patches": {
+        "drupal/migrate_plus": {
+            "Allow for urls via callback, https://www.drupal.org/project/migrate_plus/issues/3040427": "https://www.drupal.org/files/issues/2023-02-15/3040427-42-migrate_plus_multiple_urls.patch"
+        }
+    },
+    ...
+``

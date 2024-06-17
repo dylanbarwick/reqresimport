@@ -186,19 +186,4 @@ class FetchJson implements FetchJsonInterface {
     }
   }
 
-  /**
-   * Build and return a valid URL to fetch reqres data based on default config.
-   * 
-   * @return array
-   */
-  public function getReqresUrl(): array {
-    $config = $this->getDefaultConfig();
-    $url = $config['default_url'];
-    $parameter = $config['default_parameter'];
-    $parameter_value = $config['default_parameter_value'];
-    $full_url[] = $url . '?' . $parameter . '=' . $parameter_value;
-    $this->loggerFactory->get('reqresimport - getReqresUrl')->notice('Getting the default URL: %url', ['%url' => $full_url]);
-    return $full_url;
-  }
-
 }
