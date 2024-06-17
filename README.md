@@ -31,3 +31,19 @@ Build a command that pulls data from an API and stores the User records.
 We could potentially use this command in a schedule/cron to repeatedly update the users from the API.
 
 Please don’t view this task as just completing the functional requirements. This is your chance to wow us with what you can do.
+
+
+# Operating instructions
+
+1 - install module
+2 - go here: `/admin/people` check list of users
+3 - go here: `reqresimport/fetch-json` and adjust "parameter value" to `2`
+4 - click `send` - you should see a table of six retrieved entries starting with `michael.lawson@reqres.in`
+5 - uncheck "preview option" and click `send`
+6 - go back to `/admin/people` and you should see six new user accounts.
+7 - call up a terminal window and sh into the web server
+8 - type `drush mim reqres_user_data` and hit return
+9 - go back to `/admin/people` and you should see six new user accounts, these will have an image saved against `field_reqres_avatar_image`.
+10 - you may need to adjust visibility of fields here: `/admin/config/people/accounts/form-display` to make sure all of the `field_reqres_*` fields are visible on the form.
+
+The automated tests are not finished. Any advice you can give would be much appreciated.
