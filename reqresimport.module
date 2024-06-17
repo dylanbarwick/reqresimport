@@ -47,3 +47,22 @@ function reqresimport_cron() {
   }
   \Drupal::state()->set('reqresimport.last_check', $time);
 }
+
+/**
+ * Build and return a valid URL to fetch reqres data based on default config.
+ * 
+ * @return array
+ */
+function reqresimport_get_url(): array {
+  $jsonfetcher = \Drupal::service('reqresimport.fetchjson');
+  $config = $jsonfetcher->getDefaultConfig();
+  $url = $config['default_url'];
+  $parameter = $config['default_parameter'];
+  $parameter_value = $config['default_parameter_value'];
+  $full_url[] = $url . '?' . $parameter . '=' . $parameter_value;
+  // Log the URL.
+  \Drupal::logger('reqresimport_get_url')->notice('<pre>' . print_r($full_url, TRUE) . '</pre>');
+  return $full_url;
+}
+
+// \Drupal::logger('reqresimport_get_url - debug')->notice('<pre>' . print_r($this->urls[$this->activeUrl], TRUE) . '</pre>');

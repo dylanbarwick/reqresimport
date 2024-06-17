@@ -9,7 +9,6 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\user\Entity\User;
 use GuzzleHttp\ClientInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use PSpell\Config;
 
 /**
  * Fetch JSON data from the `reqres.in` API.
@@ -17,28 +16,28 @@ use PSpell\Config;
 class FetchJson implements FetchJsonInterface {
 
   /**
-   * The logger channel factory.
+   * The logger channel factory - $logger_factory.
    *
    * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
    */
   protected $loggerFactory;
 
   /**
-   * The entity manager.
+   * The entity manager - $entity_type_manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
-   * The HTTP client.
+   * The HTTP client - $http_client.
    *
    * @var \GuzzleHttp\ClientInterface
    */
   protected $httpClient;
 
   /**
-   * The configuration factory.
+   * The configuration factory - $config_factory.
    * 
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
@@ -47,7 +46,7 @@ class FetchJson implements FetchJsonInterface {
   /**
    * Constructs a FetchJson object.
    * 
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   The logger channel factory.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity manager.
@@ -81,12 +80,12 @@ class FetchJson implements FetchJsonInterface {
   public function fetchJsonData($url, array $params = []): mixed {
     // Check validity of $url parameter.
     if ($url && !parse_url($url)) {
-      // $this->loggerFactory->get('reqresimport')->notice('Duff URL provided.');
+      $this->loggerFactory->get('reqresimport')->notice('Duff URL provided.');
       return FALSE;
     }
     // Check if the params array is empty.
     if (empty($params)) {
-      // $this->loggerFactory->get('reqresimport')->info('No parameters provided.');
+      $this->loggerFactory->get('reqresimport')->info('No parameters provided.');
       return FALSE;
     }
     $client = $this->httpClient;
@@ -96,12 +95,12 @@ class FetchJson implements FetchJsonInterface {
     switch ($status_code) {
       case '200':
         // It works.
-        // $this->loggerFactory->get('reqresimport')->info('Request to %url was successful.', ['%url' => $url]);
+        $this->loggerFactory->get('reqresimport')->info('Request to %url was successful.', ['%url' => $url]);
         $response = json_decode((string) $request->getBody(), TRUE);
         break;
       
       default:
-        // $this->loggerFactory->get('reqresimport')->info('Request to %url was unsuccessful (status code: ' . $status_code . ').', ['%url' => $url]);
+        $this->loggerFactory->get('reqresimport')->info('Request to %url was unsuccessful (status code: ' . $status_code . ').', ['%url' => $url]);
         $response = FALSE;
         break;
     }
@@ -125,7 +124,7 @@ class FetchJson implements FetchJsonInterface {
       // Check if the user exists by checking email.
       $existing_user = $this->userExists($user['email']);
       if ($existing_user) {
-        // $this->loggerFactory->get('reqresimport')->notice('User with email %email already exists.', ['%email' => $user['email']]);
+        $this->loggerFactory->get('reqresimport')->notice('User with email %email already exists but I will update it anyway.', ['%email' => $user['email']]);
         if ($existing_user instanceof User) {
           $existing_user
             ->set('name', strtolower($user['first_name'] . $user['last_name']))
@@ -137,7 +136,7 @@ class FetchJson implements FetchJsonInterface {
         }
       }
       else {
-        // $this->loggerFactory->get('reqresimport')->notice('Creating user with email %email.', ['%email' => $user['email']]);
+        $this->loggerFactory->get('reqresimport')->notice('Creating user with email %email.', ['%email' => $user['email']]);
         $this->entityTypeManager->getStorage('user')->create([
           'name' => strtolower($user['first_name'] . $user['last_name']),
           'mail' => $user['email'],
@@ -185,6 +184,21 @@ class FetchJson implements FetchJsonInterface {
     else {
       return reset($users);
     }
+  }
+
+  /**
+   * Build and return a valid URL to fetch reqres data based on default config.
+   * 
+   * @return array
+   */
+  public function getReqresUrl(): array {
+    $config = $this->getDefaultConfig();
+    $url = $config['default_url'];
+    $parameter = $config['default_parameter'];
+    $parameter_value = $config['default_parameter_value'];
+    $full_url[] = $url . '?' . $parameter . '=' . $parameter_value;
+    $this->loggerFactory->get('reqresimport - getReqresUrl')->notice('Getting the default URL: %url', ['%url' => $full_url]);
+    return $full_url;
   }
 
 }

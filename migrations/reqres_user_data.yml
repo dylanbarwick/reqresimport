@@ -14,8 +14,11 @@ source:
   # A callback function can be used here that will provide the URL(s) to fetch.
   # This url can be set to use the default page number specified in the settings for this module.
   # I hard-coded it here to avoid confusion with the other import function (/reqresimport/fetch-json).
+  # UPDATE: I have applied this patch: https://www.drupal.org/files/issues/2023-02-15/3040427-42-migrate_plus_multiple_urls.patch
+  # to allow for a callback function to be used to provide the URL(s) to fetch.
   urls: 
-    - 'https://reqres.in/api/users?page=1'
+    callback: reqresimport_get_url
+    # - 'https://reqres.in/api/users?page=1'
   # The selector to use to find the data items in the JSON data.
   item_selector: /data/
   # Whether to track changes to the source data.
