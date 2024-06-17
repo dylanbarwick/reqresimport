@@ -1,0 +1,19 @@
+reqresimport.reqres_settings:
+  path: '/admin/config/system/reqres-settings'
+  defaults:
+    _title: 'Reqres settings'
+    _form: 'Drupal\reqresimport\Form\ReqresSettingsForm'
+  requirements:
+    _permission: 'administer site configuration'
+
+reqresimport.fetch_json:
+  path: '/reqresimport/fetch-json'
+  defaults:
+    _title: 'Fetch Json'
+    _controller: '\Drupal\reqresimport\Controller\FetchJsonController'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      vars_from_fetchjson_form:
+        type: array

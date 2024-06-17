@@ -1,0 +1,15 @@
+name: 'reqresimport'
+type: module
+description: 'A module to import records from reqres'
+package: Custom
+core_version_requirement: ^10 || ^11
+dependencies:
+  - drupal:migrate
+  - migrate:migrate_plus
+  - migrate:migrate_tools
+  - migrate:migrate_file
+  - drupal:token
+  - drupal:field_group
+  - drupal:field
+  - drupal:user
+  - drupal:image

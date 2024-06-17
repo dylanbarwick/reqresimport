@@ -1,0 +1,160 @@
+id: reqres_user_data
+label: Reqres user data
+
+source:
+  # The plugins to use to fetch and parse the data.
+  plugin: url
+  data_fetcher_plugin: http
+  data_parser_plugin: json
+  # Relevant headers to send with the request.
+  headers:
+    Accept: 'application/json'
+    Content-Type: 'application/json'
+  # The URL(s) to fetch the data from.
+  # A callback function can be used here that will provide the URL(s) to fetch.
+  # This url can be set to use the default page number specified in the settings for this module.
+  # I hard-coded it here to avoid confusion with the other import function (/reqresimport/fetch-json).
+  urls: 
+    - 'https://reqres.in/api/users?page=1'
+  # The selector to use to find the data items in the JSON data.
+  item_selector: /data/
+  # Whether to track changes to the source data.
+  track_changes: true
+  # Under 'fields', we list the data items to be imported.
+  fields:
+    -
+      name: id
+      label: 'Reqres-issued ID for this record.'
+      selector: id
+    -
+      name: email
+      label: 'Reqres-issued email address for this record.'
+      selector: email
+    -
+      name: first_name
+      label: 'Reqres-issued first name for this record.'
+      selector: first_name
+    -
+      name: last_name
+      label: 'Reqres-issued last name for this record.'
+      selector: last_name
+    -
+      name: avatar
+      label: 'Reqres-issued URI for the avatar for this record.'
+      selector: avatar
+  # Under 'ids', we identify source fields populated above which will uniquely
+  # identify each imported item. The 'type' makes sure the migration map table
+  # uses the proper schema type for storing the IDs.
+  ids:
+    email:
+      type: string
+
+# The process part of the migration.
+process:
+  # drupal username is made up of the first_name and last_name fields.
+  name:
+    - plugin: concat
+      source:
+        - first_name
+        - last_name
+    - 
+      plugin: machine_name
+    - 
+      plugin: make_unique_entity_field
+      entity_type: user
+      field: name
+      postfix: _
+  field_reqres_id: id
+  field_reqres_first_name: first_name
+  field_reqres_last_name: last_name
+  field_reqres_avatar_uri: avatar
+  # Use the file_import plug-in to import the avatar image and manage it as a file entity.
+  'field_reqres_avatar_image/target_id':
+    plugin: file_import
+    source: avatar
+    reuse: TRUE
+    id_only: TRUE
+  'field_reqres_avatar_image/alt': '@pseudo_name'
+  'field_reqres_avatar_image/title': '@pseudo_name'
+  # The status is set to `1` so all imported users are active, not blocked.
+  status:
+    plugin: default_value
+    default_value: 1
+  # Super simple process plugin that returns current time as UNIX timestamp.
+  created:
+    plugin: get_current_time
+  # Same again.
+  changed:
+    plugin: get_current_time
+  # The roles are set to authenticated.
+  roles:
+    plugin: default_value
+    default_value: authenticated
+  # The password is set to the email address, hashed with MD5.
+  # This will do for now. In a real-world scenario, you would want to use a more secure method.
+  pass:
+    plugin: callback
+    callable: md5
+    source: '@pseudo_name'
+  # The email address is required. This row will be skipped if no email value is available.
+  mail:
+    plugin: skip_on_empty
+    method: row
+    source: email
+  # Same again.
+  init:
+    plugin: skip_on_empty
+    method: row
+    source: email
+  # The uid field is used to skip this row entirely if the email field is empty 
+  # and to generate a new user record if one doesn't exist'.
+  uid: 
+    - 
+      plugin: skip_on_empty
+      method: row
+      source: email
+      message: 'email is required but missing.'
+    - 
+      plugin: entity_generate
+      entity_type: user
+      bundle: user
+      value_key: mail
+      source: email
+      values:
+        mail: email
+        name: '@name'
+        field_reqres_id: id
+        field_reqres_first_name: first_name
+        field_reqres_last_name: last_name
+        field_reqres_avatar_uri: avatar
+        'field_reqres_avatar_image/target_id': '@field_reqres_avatar_image/target_id'
+        'field_reqres_avatar_image/alt': '@field_reqres_avatar_image/alt'
+        'field_reqres_avatar_image/title': '@field_reqres_avatar_image/title'
+        status: '@status'
+        created: '@created'
+        changed: '@changed'
+        roles: authenticated
+        password: '@password'
+
+# The destinaton secton of the migration.
+destination:
+  plugin: 'entity:user'
+  md5_passwords: true
+  # Overwrite these fields with imported data.
+  overwrite_properties:
+    - name
+    - mail
+    - field_reqres_id
+    - field_reqres_first_name
+    - field_reqres_last_name
+    - field_reqres_avatar_uri
+    - 'field_reqres_avatar_image/target_id'
+    - 'field_reqres_avatar_image/alt'
+    - 'field_reqres_avatar_image/title'
+
+# The migration dependencies are listed here.
+migration_dependencies: {}
+dependencies:
+  enforced:
+    module:
+      - reqresimport

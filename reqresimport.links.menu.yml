@@ -1,0 +1,6 @@
+reqresimport.reqres_settings:
+  title: Reqres settings
+  description: Default settings for all things reqres
+  parent: system.admin_config_system
+  route_name: reqresimport.reqres_settings
+  weight: 10

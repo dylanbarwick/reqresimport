@@ -1,0 +1,49 @@
+<?php
+
+use Drupal\migrate\Plugin\MigrationInterface;
+use Drupal\migrate\Row;
+use Drupal\migrate\Plugin\MigrateSourceInterface;
+use Drush\Drush;
+
+/**
+ * @file
+ * Primary module hooks for reqresimport module.
+ */
+
+ /**
+ * Implements hook_migrate_MIGRATION_ID_prepare_row().
+ */
+function reqresimport_migrate_reqres_user_data_prepare_row(Row $row, MigrateSourceInterface $source, MigrationInterface $migration) {
+  // Progress report - can be deleted.
+  Drush::output()->writeln('ID: ' . print_r($row->getSourceProperty('id'), TRUE));
+  Drush::output()->writeln('email: ' . print_r($row->getSourceProperty('email'), TRUE));
+  Drush::output()->writeln('empty: ' . print_r($row->getEmptyDestinationProperties(), TRUE));
+}
+
+/**
+ * Implements hook_cron().
+ */
+function reqresimport_cron() {
+  // @todo Implement cron.
+  // Run the json fetcher service.
+  $jsonfetcher = \Drupal::service('reqresimport.fetchjson');
+  $default_config = $jsonfetcher->getDefaultConfig();
+  $last_check = \Drupal::state()->get('reqresimport.last_check', 0);
+  $cron_interval = $default_config['cron_interval'];
+  $time = \Drupal::time()->getRequestTime();
+  $next_time = $last_check + $cron_interval;
+  if ($next_time > $time) {
+    return;
+  }
+  $url = $default_config['default_url'];
+  $params = [
+    $default_config['parameter'] => $default_config['parameter_value'],
+  ];
+  $fetched_json = $jsonfetcher->fetchJsonData($url, ['query' => $params]);
+  // Now we apply the data.
+  // But only if $fetched_json is not empty.
+  if ($fetched_json && !empty($fetched_json)) {
+    $jsonfetcher->applyJsonData($fetched_json);
+  }
+  \Drupal::state()->set('reqresimport.last_check', $time);
+}
