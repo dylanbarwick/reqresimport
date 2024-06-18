@@ -9,6 +9,8 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\user\Entity\User;
 use GuzzleHttp\ClientInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\file\Entity\File;
 
 /**
  * Fetch JSON data from the `reqres.in` API.
@@ -134,10 +136,24 @@ class FetchJson implements FetchJsonInterface {
             ->set('field_reqres_avatar_uri', $user['avatar'])
             ->save();
         }
+        $uid = (int)$existing_user->id();
+        // Check to see if this user has a populated avatar image field.
+        $avatar_present = $existing_user->get('field_reqres_avatar_image')->isEmpty() ? FALSE : TRUE;
+        // Get the current avatar URI.
+        $avatar_current = $existing_user->get('field_reqres_avatar_uri')->value;
+        // Compare the current avatar URI with the one in the JSON data OR if the avatar is not present.
+        if ($avatar_current !== $user['avatar'] || !$avatar_present) {
+          // There is no avatar or the avatar URI has changed.
+          $avatar_exists = FALSE;
+        }
+        else {
+          // The avatar URI is the same so we shouldn't try to save the URI as a managed file entity.
+          $avatar_exists = TRUE;
+        }
       }
       else {
         $this->loggerFactory->get('reqresimport')->notice('Creating user with email %email.', ['%email' => $user['email']]);
-        $this->entityTypeManager->getStorage('user')->create([
+        $new_user = $this->entityTypeManager->getStorage('user')->create([
           'name' => strtolower($user['first_name'] . $user['last_name']),
           'mail' => $user['email'],
           'init' => $user['email'],
@@ -149,9 +165,59 @@ class FetchJson implements FetchJsonInterface {
           'roles' => ['authenticated'],
           'pass' => strtolower($user['first_name'] . $user['last_name']) . $user['id'],
         ])->save();
+        $uid = (int)$new_user;
+        // As this is a new user record we can safel assume that there is no existing avatar.
+        $avatar_exists = FALSE;
+      }
+      // Save the avatar as an image if we have a UID, an avatar URI in the json data and this URI does not exist as a file.
+      if ($uid && !empty($user['avatar']) && !$avatar_exists) {
+        $this->saveAvatarImage($user['avatar'], $uid);
       }
     }
 
+  }
+
+  /**
+   * Take the avatar URL and save it as a managed file in field_reqres_avatar_image.
+   * 
+   * @param string $avatar_url
+   *   The URL of the avatar image.
+   * @param int $uid
+   *   The user ID.
+   * 
+   * @return void
+   */
+  protected function saveAvatarImage(string $avatar_url, int $uid): void {
+    $directory = 'public://reqres/avatar/' . $uid;
+    /** @var \Drupal\Core\File\FileSystemInterface $file_system */
+    $file_system = \Drupal::service('file_system');
+    $file_repository = \Drupal::service('file.repository');
+    $file_system->prepareDirectory($directory, FileSystemInterface:: CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
+    $data = (string) \Drupal::httpClient()->get($avatar_url)->getBody();
+    $file_name = basename($avatar_url);
+    $file_repository->writeData($data, $directory . '/' . $file_name, FileSystemInterface::EXISTS_REPLACE);
+
+    $file = File::create([
+      'filename' => $file_name,
+      'uri' => 'public://reqres/avatar/' . $uid . '/' . $file_name,
+      'status' => 1,
+      'uid' => $uid,
+    ]);
+    $file->save();
+    $file_id = $file->id();
+    $user = User::load($uid);
+
+    //Populate the field_reqres_avatar_image field and subfields.
+    $user->set('field_reqres_avatar_image', [
+      'target_id' => $file_id,
+      'alt' => 'Avatar for ' . $user->get('name')->value,
+      'title' => 'Avatar for ' . $user->get('name')->value,
+    ])->save();
+
+    // Add file usage.
+    /** @var \Drupal\file\FileUsage\DatabaseFileUsageBackend $file_usage */
+    $file_usage = \Drupal::service('file.usage');
+    $file_usage->add($file, 'reqresimport', 'user', $uid);
   }
 
   /**

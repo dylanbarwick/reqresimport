@@ -60,7 +60,7 @@ class FetchJsonController extends ControllerBase {
         'data' => $this->t('Last name'),
       ],
       'avatar' => [
-        'data' => $this->t('Avatar'),
+        'data' => $this->t('Avatar URI'),
       ],
     ];
 
