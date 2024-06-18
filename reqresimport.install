@@ -3,4 +3,39 @@
 /**
  * @file
  * Install, update and uninstall functions for the reqresimport module.
+ * 
+ * Note: to rerun an update function, use ths snippet to reset the hook_update_N value:
+ * drush ev "\Drupal::service('update.update_hook_registry')->setInstalledVersion('reqresimport', 8000);"
  */
+
+use Drupal\Core\Config\FileStorage;
+
+/**
+ * Helper function to import single config file.
+ * 
+ * This will allow you to commit a new config file to the config/install folder
+ * and then apply it without having to uninstall/reinstall the module.
+ * Inspired by this gist: 
+ * https://gist.github.com/crittermike/2d2c6734c506d509505fa79142125757?permalink_comment_id=3423368#gistcomment-3423368
+ *
+ * @param string $config_path
+ *   The path to the config/install folder.
+ * @param string $config_name
+ *   The name of the config item to import from the config folder.
+ */
+function reqresimport_import_single_config($config_path, $config_name) {
+  $source = new FileStorage($config_path);
+  $config_storage = \Drupal::service('config.storage');
+  $config_storage->write($config_name, $source->read($config_name));
+}
+
+ /**
+  * Runs `drush cim` on module-specific config files in the `config/install` folder.
+  */
+function reqresimport_update_8001() {
+  // Get path for this module.
+  $module_path = \Drupal::service('extension.list.module')->getPath('reqresimport');
+  // Use helper function to apply updated install config file.
+  reqresimport_import_single_config($module_path . '/config/install', 'views.view.imported_users');
+}
+
