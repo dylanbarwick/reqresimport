@@ -40,8 +40,8 @@ Please don’t view this task as just completing the functional requirements. Th
 4. Click "send" - you should see a table of six retrieved entries starting with `michael.lawson@reqres.in`.
 5. Uncheck the "preview option" and click "send".
 6. Go back to `/admin/people` and you should see six new user accounts.
-7. Call up a terminal window and sh into the web server.
-8. Type `drush mim reqres_user_data` and hit return.
+7. Call up a terminal window and ssh into the web server.
+8. Type `drush migrate:import reqres_user_data` and hit return.
 9. Go back to `/admin/people` and you should see six new user accounts. These will have an image saved against `field_reqres_avatar_image`.
 10. You may need to adjust the visibility of fields here: `/admin/config/people/accounts/form-display` to make sure all of the `field_reqres_*` fields are visible on the form.
 
@@ -53,10 +53,18 @@ Insert this in the `composer.json` file under `extra`:
 
 ``
 "extra": {
-    "patches": {
-        "drupal/migrate_plus": {
-            "Allow for urls via callback, https://www.drupal.org/project/migrate_plus/issues/3040427": "https://www.drupal.org/files/issues/2023-02-15/3040427-42-migrate_plus_multiple_urls.patch"
-        }
-    },
-    ...
+  "patches": {
+    "drupal/migrate_plus": {
+      "Allow for urls via callback, https://www.drupal.org/project/migrate_plus/issues/3040427": "https://www.drupal.org/files/issues/2023-02-15/3040427-42-migrate_plus_multiple_urls.patch"
+    }
+  },
+  ...
 ``
+
+## Update 2024-06-18 16:00 
+
+There is now a view available (`/reqresimport/imported-users`) that will list all user accounts with a populated `field_reqres_id` field. It lists all the fields populated with data from `reqres` and also offers links to edit and also reimport each one. 
+
+The reimport function will individually fetch data from reqres and overwrite any local changes you might have made.
+
+In order to effect these changes you should run `drush updb`.
