@@ -11,11 +11,16 @@ use GuzzleHttp\ClientInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file\Entity\File;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Messenger\MessengerTrait;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Fetch JSON data from the `reqres.in` API.
  */
 class FetchJson implements FetchJsonInterface {
+
+  use MessengerTrait;
 
   /**
    * The logger channel factory - $logger_factory.
@@ -56,16 +61,20 @@ class FetchJson implements FetchJsonInterface {
    *   The HTTP client.
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
    *   The configuration factory.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger service.
    */
   public function __construct(
     LoggerChannelFactoryInterface $logger_factory, 
     EntityTypeManagerInterface $entity_type_manager, 
     ClientInterface $http_client,
-    ConfigFactoryInterface $config_factory) {
+    ConfigFactoryInterface $config_factory, 
+    MessengerInterface $messenger) {
     $this->loggerFactory = $logger_factory;
     $this->entityTypeManager = $entity_type_manager;
     $this->httpClient = $http_client;
     $this->configFactory = $config_factory;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -108,6 +117,60 @@ class FetchJson implements FetchJsonInterface {
     }
     
     return $response;
+  }
+
+  /**
+   * Fetch a single record.
+   * 
+   * @param int $id
+   *   The ID of the record to fetch.
+   * 
+   * @return mixed
+   *   Either JSON data or boolean FALSE.
+   */
+  public function fetchSingleRecord(int $id): mixed {
+    $url = $this->configFactory->get('reqresimport.settings')->get('default_url');
+    // Check validity of $url parameter.
+    if ($url && !parse_url($url)) {
+      $this->loggerFactory->get('reqresimport')->notice('Duff URL provided.');
+      return FALSE;
+    }
+    // Check if the $id parameter is an integer.
+    if (!is_int($id)) {
+      $this->loggerFactory->get('reqresimport')->notice('ID parameter is not an integer.');
+      return FALSE;
+    }
+    $client = $this->httpClient;
+    $request = $client->request('GET', $url . '/' . $id);
+    // Get the response code.
+    $status_code = $request->getStatusCode();
+    switch ($status_code) {
+      case '200':
+        // It works.
+        $this->loggerFactory->get('reqresimport')->info('Request to %url was successful.', ['%url' => $url]);
+        $fetched = json_decode((string) $request->getBody(), TRUE);
+        // Put the single retrieved record into an array so we can feed it to applyJsonData()
+        $data = $fetched['data'];
+        unset($fetched['data']);
+        $fetched['data'][] = $data;
+        $this->applyJsonData($fetched);
+        $response = 'User record, ' . $fetched['data'][0]['email'] . ' updated.';
+        // Set message to be displayed.
+        $this->messenger()->addMessage($response, 'status');
+        break;
+      
+      default:
+        $this->loggerFactory->get('reqresimport')->info('Request to %url was unsuccessful (status code: ' . $status_code . ').', ['%url' => $url]);
+        $response = 'No record returned. Invalid ID.';
+        // Set message to be displayed.
+        $this->messenger()->addMessage($response, 'error');
+        break;
+    }
+    
+    // Redirect back to admin view.
+    // @todo: Handle this URL better.
+    return new RedirectResponse('/reqresimport/imported-users');
+
   }
 
   /**

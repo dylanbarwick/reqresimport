@@ -17,3 +17,15 @@ reqresimport.fetch_json:
     parameters:
       vars_from_fetchjson_form:
         type: array
+
+reqresimport.fetch_single_json:
+  path: '/reqresimport/fetch-single-json/{id}'
+  defaults:
+    _title: 'Fetch Single Json record'
+    _controller: 'reqresimport.fetchjson:fetchSingleRecord'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      id:
+        type: integer
