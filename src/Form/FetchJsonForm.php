@@ -23,7 +23,8 @@ final class FetchJsonForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $query_params = \Drupal::request()->query->all();
+    $request = $this->getRequest();
+    $query_params = $request->query->all();
     $config = $this->config('reqresimport.settings');
     if (empty($query_params['vars_from_fetchjson_form'])) {
       $vars = [
