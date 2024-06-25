@@ -6,9 +6,9 @@ use Drupal\Component\Serialization\Json;
 use GuzzleHttp\Client;
 
 /**
- * Class CatApiClient
+ * Class ReqresApiClient
  *
- * @package Drupal\cat_api\Service
+ * @package Drupal\reqresimport\Service
  */
 class ReqresApiClient implements ReqresApiClientInterface {
 
