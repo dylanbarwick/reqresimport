@@ -46,9 +46,9 @@ class ReqresApiClientFactory {
   }
 
   /**
-   * Create a new fully prepared instance of CatApiClient.
+   * Create a new fully prepared instance of ReqresApiClient.
    *
-   * @return \Drupal\reqresimport\Service\CatApiClient
+   * @return \Drupal\reqresimport\Service\ReqresApiClient
    */
   public function create() {
     $config = $this->configFactory->get('reqresimport.settings');
