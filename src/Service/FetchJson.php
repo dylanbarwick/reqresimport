@@ -174,6 +174,56 @@ class FetchJson implements FetchJsonInterface {
   }
 
   /**
+   * Fetch a single record using the reqresimport.client service.
+   * 
+   * @param int $id
+   *   The ID of the record to fetch.
+   * 
+   * @return mixed
+   *   Either JSON data or boolean FALSE.
+   */
+  public function fetchSingleRecordApi(int $id): mixed {
+    $url = $this->configFactory->get('reqresimport.settings')->get('default_url');
+    // Check validity of $url parameter.
+    if ($url && !parse_url($url)) {
+      $this->loggerFactory->get('reqresimport')->notice('Duff URL provided.');
+      return FALSE;
+    }
+    // Check if the $id parameter is an integer.
+    if (!is_int($id)) {
+      $this->loggerFactory->get('reqresimport')->notice('ID parameter is not an integer.');
+      return FALSE;
+    }
+    $client = $this->httpClient;
+    // Get client from reqresimport.client service.
+    $client = \Drupal::service('reqresimport.client');
+    $fetched = $client->get($url . '/' . $id);
+    if (!empty($fetched) && is_array($fetched) && count($fetched) > 0) {
+      $this->loggerFactory->get('reqresimport')->info('Request to %url was successful.', ['%url' => $url]);
+      
+      // Put the single retrieved record into an array so we can feed it to applyJsonData()
+      $data = $fetched['data'];
+      unset($fetched['data']);
+      $fetched['data'][] = $data;
+      $this->applyJsonData($fetched);
+      $response = 'User record, ' . $fetched['data'][0]['email'] . ' updated.';
+      // Set message to be displayed.
+      $this->messenger()->addMessage($response, 'status');
+    }
+    else {
+      $this->loggerFactory->get('reqresimport')->info('Request to %url was unsuccessful', ['%url' => $url]);
+      $response = 'No record returned. Possibly invalid ID.';
+      // Set message to be displayed.
+      $this->messenger()->addMessage($response, 'error');
+    }
+    
+    // Redirect back to admin view.
+    // @todo: Handle this URL better.
+    return new RedirectResponse('/reqresimport/imported-users');
+
+  }
+
+  /**
    * Process the retrieved JSON data.
    * 
    * @param array $fetched_json

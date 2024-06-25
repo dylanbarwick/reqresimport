@@ -22,7 +22,7 @@ reqresimport.fetch_single_json:
   path: '/reqresimport/fetch-single-json/{id}'
   defaults:
     _title: 'Fetch Single Json record'
-    _controller: 'reqresimport.fetchjson:fetchSingleRecord'
+    _controller: 'reqresimport.fetchjson:fetchSingleRecordApi'
   requirements:
     _permission: 'access content'
   options:

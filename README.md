@@ -68,3 +68,11 @@ There is now a view available (`/reqresimport/imported-users`) that will list al
 The reimport function will individually fetch data from reqres and overwrite any local changes you might have made.
 
 In order to effect these changes you should run `drush updb`.
+
+## Update 2024-06-25 13:00 
+
+Credit where it's due, the bulk of the http client service ReqresApiClient comes from this github repo: https://github.com/daggerhart/drupal8_examples/tree/master/modules/cat_api
+
+...although I did manage to adapt it and integrate it into my own efforts in under an hour. The FetchJson service should be renamed ReqresUtils for clarity and the http client code in that service is now redundant but I left it in there to give you an idea of how I eventually ended up where I did.
+
+Come to think of it, the utility methods in FetchJson also violate the single responsibility principle.

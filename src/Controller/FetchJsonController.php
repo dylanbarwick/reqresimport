@@ -15,8 +15,9 @@ class FetchJsonController extends ControllerBase {
    * Builds the response.
    */
   public function __invoke($vars_from_fetchjson_form = NULL): array {
-    $jsonfetcher = \Drupal::service('reqresimport.fetchjson');
-    $default_config = $jsonfetcher->getDefaultConfig();
+    $reqres_getter = \Drupal::service('reqresimport.client');
+    $json_utils = \Drupal::service('reqresimport.fetchjson');
+    $default_config = $json_utils->getDefaultConfig();
     $query_params = \Drupal::request()->query->all();
     if (empty($query_params['vars_from_fetchjson_form'])) {
       $vars_from_fetchjson_form = [
@@ -35,13 +36,14 @@ class FetchJsonController extends ControllerBase {
     $params = [
       $vars_from_fetchjson_form['parameter'] => $vars_from_fetchjson_form['parameter_value'],
     ];
-    $fetched_json = $jsonfetcher->fetchJsonData($url, ['query' => $params]);
+    // $fetched_json = $json_utils->fetchJsonData($url, ['query' => $params]);
+    $fetched_json = $reqres_getter->get($url, $params);
 
     // Apply data only if $fetched_json is TRUE and not empty.
     if ($fetched_json && !empty($fetched_json)) {
       // If the preview_option is `0` then we will create/update the user records.
       if ($vars_from_fetchjson_form['preview_option'] === '0') {
-        $jsonfetcher->applyJsonData($fetched_json);
+        $json_utils->applyJsonData($fetched_json);
       }
     }
 
