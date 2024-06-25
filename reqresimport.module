@@ -55,8 +55,8 @@ function reqresimport_cron() {
  * @return array
  */
 function reqresimport_get_url(): array {
-  $jsonfetcher = \Drupal::service('reqresimport.fetchjson');
-  $config = $jsonfetcher->getDefaultConfig();
+  $json_utils = \Drupal::service('reqresimport.fetchjson');
+  $config = $json_utils->getDefaultConfig();
   $url = $config['default_url'];
   $parameter = $config['default_parameter'];
   $parameter_value = $config['default_parameter_value'];
@@ -65,5 +65,3 @@ function reqresimport_get_url(): array {
   \Drupal::logger('reqresimport_get_url')->notice('<pre>' . print_r($full_url, TRUE) . '</pre>');
   return $full_url;
 }
-
-// \Drupal::logger('reqresimport_get_url - debug')->notice('<pre>' . print_r($this->urls[$this->activeUrl], TRUE) . '</pre>');
