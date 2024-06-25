@@ -1,7 +1,7 @@
 services:
   reqresimport.fetchjson:
     class: Drupal\reqresimport\Service\FetchJson
-    arguments: ['@logger.factory', '@entity_type.manager', '@http_client', '@config.factory', '@messenger']
+    arguments: ['@logger.factory', '@entity_type.manager', '@http_client', '@config.factory', '@messenger', '@reqresimport.client']
 
   # Client factory service.
   reqresimport.client_factory:

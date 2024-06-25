@@ -51,6 +51,13 @@ class FetchJson implements FetchJsonInterface {
   protected $configFactory;
 
   /**
+   * The ReqresApiClient service - $reqres_client.
+   * 
+   * @var \Drupal\reqresimport\Service\ReqresApiClientInterface
+   */
+  protected $reqresClient;
+
+  /**
    * Constructs a FetchJson object.
    * 
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
@@ -63,18 +70,22 @@ class FetchJson implements FetchJsonInterface {
    *   The configuration factory.
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   The messenger service.
+   * @param \Drupal\reqresimport\Service\ReqresApiClientInterface $reqres_client
+   *   The ReqresApiClient service.
    */
   public function __construct(
     LoggerChannelFactoryInterface $logger_factory, 
     EntityTypeManagerInterface $entity_type_manager, 
     ClientInterface $http_client,
     ConfigFactoryInterface $config_factory, 
-    MessengerInterface $messenger) {
+    MessengerInterface $messenger,
+    ReqresApiClientInterface $reqres_client) {
     $this->loggerFactory = $logger_factory;
     $this->entityTypeManager = $entity_type_manager;
     $this->httpClient = $http_client;
     $this->configFactory = $config_factory;
     $this->messenger = $messenger;
+    $this->reqresClient = $reqres_client;
   }
 
   /**
@@ -196,7 +207,7 @@ class FetchJson implements FetchJsonInterface {
     }
     // $client = $this->httpClient;
     // Get client from reqresimport.client service.
-    $client = \Drupal::service('reqresimport.client');
+    $client = $this->reqresClient;
     $fetched = $client->get($url . '/' . $id);
     if (!empty($fetched) && is_array($fetched) && count($fetched) > 0) {
       $this->loggerFactory->get('reqresimport')->info('Request to %url was successful.', ['%url' => $url]);
