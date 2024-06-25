@@ -31,6 +31,10 @@ function reqresimport_cron() {
   $default_config = $json_utils->getDefaultConfig();
   $last_check = \Drupal::state()->get('reqresimport.last_check', 0);
   $cron_interval = $default_config['cron_interval'];
+  // Check if the cron_interval is 0 and quit if it is.
+  if ($cron_interval === 0) {
+    return;
+  }
   $time = \Drupal::time()->getRequestTime();
   $next_time = $last_check + $cron_interval;
   if ($next_time > $time) {
@@ -40,7 +44,7 @@ function reqresimport_cron() {
   $params = [
     $default_config['parameter'] => $default_config['parameter_value'],
   ];
-  $fetched_json = $reqres_getter->get($url, ['query' => $params]);
+  $fetched_json = $reqres_getter->get($url, $params);
   // Now we apply the data.
   // But only if $fetched_json is not empty.
   if ($fetched_json && !empty($fetched_json)) {
