@@ -78,7 +78,7 @@ class FetchJson implements FetchJsonInterface {
   }
 
   /**
-   * Fetch JSON data from the `reqres.in` API.
+   * Fetch JSON data from the `reqres.in` API (now redundant as we have a service for this in ReqresApiClientInterface.php)
    * 
    * @param string $url
    *   The URL to fetch JSON data from.
@@ -120,7 +120,7 @@ class FetchJson implements FetchJsonInterface {
   }
 
   /**
-   * Fetch a single record.
+   * Fetch a single record (also redundant and superceded by fetchSingleRecordApi below).
    * 
    * @param int $id
    *   The ID of the record to fetch.
@@ -194,7 +194,7 @@ class FetchJson implements FetchJsonInterface {
       $this->loggerFactory->get('reqresimport')->notice('ID parameter is not an integer.');
       return FALSE;
     }
-    $client = $this->httpClient;
+    // $client = $this->httpClient;
     // Get client from reqresimport.client service.
     $client = \Drupal::service('reqresimport.client');
     $fetched = $client->get($url . '/' . $id);

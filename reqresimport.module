@@ -26,8 +26,9 @@ function reqresimport_migrate_reqres_user_data_prepare_row(Row $row, MigrateSour
 function reqresimport_cron() {
   // @todo Implement cron.
   // Run the json fetcher service.
-  $jsonfetcher = \Drupal::service('reqresimport.fetchjson');
-  $default_config = $jsonfetcher->getDefaultConfig();
+  $reqres_getter = \Drupal::service('reqresimport.client');
+  $json_utils = \Drupal::service('reqresimport.fetchjson');
+  $default_config = $json_utils->getDefaultConfig();
   $last_check = \Drupal::state()->get('reqresimport.last_check', 0);
   $cron_interval = $default_config['cron_interval'];
   $time = \Drupal::time()->getRequestTime();
@@ -39,11 +40,11 @@ function reqresimport_cron() {
   $params = [
     $default_config['parameter'] => $default_config['parameter_value'],
   ];
-  $fetched_json = $jsonfetcher->fetchJsonData($url, ['query' => $params]);
+  $fetched_json = $reqres_getter->get($url, ['query' => $params]);
   // Now we apply the data.
   // But only if $fetched_json is not empty.
   if ($fetched_json && !empty($fetched_json)) {
-    $jsonfetcher->applyJsonData($fetched_json);
+    $json_utils->applyJsonData($fetched_json);
   }
   \Drupal::state()->set('reqresimport.last_check', $time);
 }
