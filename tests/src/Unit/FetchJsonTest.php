@@ -3,7 +3,7 @@
 namespace Drupal\Tests\reqresimport\Unit;
 
 use Drupal\Tests\UnitTestCase;
-use Drupal\reqresimport\Service\FetchJson;
+use Drupal\reqresimport\Service\JsonUtilities;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -140,20 +140,20 @@ class FetchJsonTest extends UnitTestCase {
    *
    * @dataProvider fetchJsonData
    * */
-  public function notestFetchJsonData(array $input, $expected) {
-    $loggerService = $this->createMock(LoggerChannelFactoryInterface::class);
-    $entityTypeManagerService = $this->createMock(EntityTypeManagerInterface::class);
-    $httpClientService = $this->createMock(ClientInterface::class);
-    $configFactoryService = $this->createMock(ConfigFactoryInterface::class);
-    $fetchJsonService = new FetchJson($loggerService, $entityTypeManagerService, $httpClientService, $configFactoryService);
+  // public function notestFetchJsonData(array $input, $expected) {
+  //   $loggerService = $this->createMock(LoggerChannelFactoryInterface::class);
+  //   $entityTypeManagerService = $this->createMock(EntityTypeManagerInterface::class);
+  //   $httpClientService = $this->createMock(ClientInterface::class);
+  //   $configFactoryService = $this->createMock(ConfigFactoryInterface::class);
+  //   $jsonService = new JsonUtilities($loggerService, $entityTypeManagerService, $httpClientService, $configFactoryService);
 
-    $result = $fetchJsonService->fetchJsonData($input['url'], $input['params']);
-    // Label all feedback.
-    fwrite(STDOUT, "\n======================\ntestFetchJsonData \n======================\n");
-    fwrite(STDOUT, "input:    " . print_r($input, TRUE) . " \nexpected: " . print_r($expected, TRUE) . " \nresult:   " . print_r($result, TRUE) . " \n");
+  //   $result = $jsonService->fetchJsonData($input['url'], $input['params']);
+  //   // Label all feedback.
+  //   fwrite(STDOUT, "\n======================\ntestFetchJsonData \n======================\n");
+  //   fwrite(STDOUT, "input:    " . print_r($input, TRUE) . " \nexpected: " . print_r($expected, TRUE) . " \nresult:   " . print_r($result, TRUE) . " \n");
 
-    $this->assertIsArray($result);
-  }
+  //   $this->assertIsArray($result);
+  // }
 
   /**
    * Feeds values to the getDefaultConfig method and tests if an array is returned.
@@ -163,22 +163,22 @@ class FetchJsonTest extends UnitTestCase {
    *
    * @dataProvider getDefaultConfigData
    * */
-  public function notestGetDefaultConfig($expected) {
-    $loggerService = $this->createMock(LoggerChannelFactoryInterface::class);
-    $entityTypeManagerService = $this->createMock(EntityTypeManagerInterface::class);
-    $httpClientService = $this->createMock(ClientInterface::class);
-    $configFactoryService = $this->createMock(ConfigFactoryInterface::class);
-    $fetchJsonService = new FetchJson($loggerService, $entityTypeManagerService, $httpClientService, $configFactoryService);
+  // public function notestGetDefaultConfig($expected) {
+  //   $loggerService = $this->createMock(LoggerChannelFactoryInterface::class);
+  //   $entityTypeManagerService = $this->createMock(EntityTypeManagerInterface::class);
+  //   $httpClientService = $this->createMock(ClientInterface::class);
+  //   $configFactoryService = $this->createMock(ConfigFactoryInterface::class);
+  //   $fetchJsonService = new JsonUtilities($loggerService, $entityTypeManagerService, $httpClientService, $configFactoryService);
 
-    $result = $fetchJsonService->getDefaultConfig();
-    // Label all feedback.
-    fwrite(STDOUT, "\n======================\ntestGetDefaultConfig \n======================\n");
-    fwrite(STDOUT, "expected: $expected \nresult:   $result \n");
+  //   $result = $fetchJsonService->getDefaultConfig();
+  //   // Label all feedback.
+  //   fwrite(STDOUT, "\n======================\ntestGetDefaultConfig \n======================\n");
+  //   fwrite(STDOUT, "expected: $expected \nresult:   $result \n");
 
-    $this->assertIsString($result['default_url']);
-    $this->assertIsString($result['default_parameter']);
-    $this->assertIsString($result['default_parameter_value']);
-  }
+  //   $this->assertIsString($result['default_url']);
+  //   $this->assertIsString($result['default_parameter']);
+  //   $this->assertIsString($result['default_parameter_value']);
+  // }
 
   /**
    * Feeds values to the userExists method and tests if a user object is returned.
@@ -190,21 +190,21 @@ class FetchJsonTest extends UnitTestCase {
    * 
    * @dataProvider userExistsData
    */
-  public function notestUserExists($input, $expected) {
-    $loggerService = $this->createMock(LoggerChannelFactoryInterface::class);
-    $entityTypeManagerService = $this->createMock(EntityTypeManagerInterface::class);
-    $httpClientService = $this->createMock(ClientInterface::class);
-    $configFactoryService = $this->createMock(ConfigFactoryInterface::class);
-    // $reflectedFetchJson = new \ReflectionClass(FetchJson::class);
-    // $reflectedFetchJson->getMethod('userExists')->setAccessible(TRUE);
-    $fetchJsonService = new FetchJson($loggerService, $entityTypeManagerService, $httpClientService, $configFactoryService);
+  // public function notestUserExists($input, $expected) {
+  //   $loggerService = $this->createMock(LoggerChannelFactoryInterface::class);
+  //   $entityTypeManagerService = $this->createMock(EntityTypeManagerInterface::class);
+  //   $httpClientService = $this->createMock(ClientInterface::class);
+  //   $configFactoryService = $this->createMock(ConfigFactoryInterface::class);
+  //   // $reflectedFetchJson = new \ReflectionClass(JsonUtilities::class);
+  //   // $reflectedFetchJson->getMethod('userExists')->setAccessible(TRUE);
+  //   $fetchJsonService = new JsonUtilities($loggerService, $entityTypeManagerService, $httpClientService, $configFactoryService);
 
-    $result = $fetchJsonService->userExists($input);
-    // Label all feedback.
-    fwrite(STDOUT, "\n======================\ntestUserExists \n======================\n");
-    fwrite(STDOUT, "input:    $input \nexpected: $expected \nresult:   $result \n");
+  //   $result = $fetchJsonService->userExists($input);
+  //   // Label all feedback.
+  //   fwrite(STDOUT, "\n======================\ntestUserExists \n======================\n");
+  //   fwrite(STDOUT, "input:    $input \nexpected: $expected \nresult:   $result \n");
 
-    $this->assertEquals($expected, $result);
-  }
+  //   $this->assertEquals($expected, $result);
+  // }
 
 }

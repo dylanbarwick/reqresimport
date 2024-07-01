@@ -16,7 +16,7 @@ class FetchJsonController extends ControllerBase {
    */
   public function __invoke($vars_from_fetchjson_form = NULL): array {
     $reqres_getter = \Drupal::service('reqresimport.client');
-    $json_utils = \Drupal::service('reqresimport.fetchjson');
+    $json_utils = \Drupal::service('reqresimport.jsonutilities');
     $default_config = $json_utils->getDefaultConfig();
     $query_params = \Drupal::request()->query->all();
     if (empty($query_params['vars_from_fetchjson_form'])) {
@@ -30,13 +30,11 @@ class FetchJsonController extends ControllerBase {
     else {
       $vars_from_fetchjson_form = $query_params['vars_from_fetchjson_form'];
     }
-    // dump($vars_from_fetchjson_form);
 
     $url = $vars_from_fetchjson_form['url'];
     $params = [
       $vars_from_fetchjson_form['parameter'] => $vars_from_fetchjson_form['parameter_value'],
     ];
-    // $fetched_json = $json_utils->fetchJsonData($url, ['query' => $params]);
     $fetched_json = $reqres_getter->get($url, $params);
 
     // Apply data only if $fetched_json is TRUE and not empty.

@@ -27,7 +27,7 @@ function reqresimport_cron() {
   // @todo Implement cron.
   // Run the json fetcher service.
   $reqres_getter = \Drupal::service('reqresimport.client');
-  $json_utils = \Drupal::service('reqresimport.fetchjson');
+  $json_utils = \Drupal::service('reqresimport.jsonutilities');
   $default_config = $json_utils->getDefaultConfig();
   $last_check = \Drupal::state()->get('reqresimport.last_check', 0);
   $cron_interval = $default_config['cron_interval'];
@@ -59,7 +59,7 @@ function reqresimport_cron() {
  * @return array
  */
 function reqresimport_get_url(): array {
-  $json_utils = \Drupal::service('reqresimport.fetchjson');
+  $json_utils = \Drupal::service('reqresimport.jsonutilities');
   $config = $json_utils->getDefaultConfig();
   $url = $config['default_url'];
   $parameter = $config['default_parameter'];

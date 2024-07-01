@@ -16,9 +16,9 @@ use Drupal\Core\Messenger\MessengerTrait;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Fetch JSON data from the `reqres.in` API.
+ * JSON Utilities to manage data from the `reqres.in` API.
  */
-class FetchJson implements FetchJsonInterface {
+class JsonUtilities implements JsonUtilitiesInterface {
 
   use MessengerTrait;
 
@@ -58,7 +58,7 @@ class FetchJson implements FetchJsonInterface {
   protected $reqresClient;
 
   /**
-   * Constructs a FetchJson object.
+   * Constructs a JsonUtilities object.
    * 
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   The logger channel factory.
@@ -86,102 +86,6 @@ class FetchJson implements FetchJsonInterface {
     $this->configFactory = $config_factory;
     $this->messenger = $messenger;
     $this->reqresClient = $reqres_client;
-  }
-
-  /**
-   * Fetch JSON data from the `reqres.in` API (now redundant as we have a service for this in ReqresApiClientInterface.php)
-   * 
-   * @param string $url
-   *   The URL to fetch JSON data from.
-   * @param array $options
-   *   An array of options to pass to the HTTP client.
-   * 
-   * @return mixed
-   *  The JSON data.
-   */
-  public function fetchJsonData($url, array $params = []): mixed {
-    // Check validity of $url parameter.
-    if ($url && !parse_url($url)) {
-      $this->loggerFactory->get('reqresimport')->notice('Duff URL provided.');
-      return FALSE;
-    }
-    // Check if the params array is empty.
-    if (empty($params)) {
-      $this->loggerFactory->get('reqresimport')->info('No parameters provided.');
-      return FALSE;
-    }
-    $client = $this->httpClient;
-    $request = $client->request('GET', $url, $params);
-    // Get the response code.
-    $status_code = $request->getStatusCode();
-    switch ($status_code) {
-      case '200':
-        // It works.
-        $this->loggerFactory->get('reqresimport')->info('Request to %url was successful.', ['%url' => $url]);
-        $response = json_decode((string) $request->getBody(), TRUE);
-        break;
-      
-      default:
-        $this->loggerFactory->get('reqresimport')->info('Request to %url was unsuccessful (status code: ' . $status_code . ').', ['%url' => $url]);
-        $response = FALSE;
-        break;
-    }
-    
-    return $response;
-  }
-
-  /**
-   * Fetch a single record (also redundant and superceded by fetchSingleRecordApi below).
-   * 
-   * @param int $id
-   *   The ID of the record to fetch.
-   * 
-   * @return mixed
-   *   Either JSON data or boolean FALSE.
-   */
-  public function fetchSingleRecord(int $id): mixed {
-    $url = $this->configFactory->get('reqresimport.settings')->get('default_url');
-    // Check validity of $url parameter.
-    if ($url && !parse_url($url)) {
-      $this->loggerFactory->get('reqresimport')->notice('Duff URL provided.');
-      return FALSE;
-    }
-    // Check if the $id parameter is an integer.
-    if (!is_int($id)) {
-      $this->loggerFactory->get('reqresimport')->notice('ID parameter is not an integer.');
-      return FALSE;
-    }
-    $client = $this->httpClient;
-    $request = $client->request('GET', $url . '/' . $id);
-    // Get the response code.
-    $status_code = $request->getStatusCode();
-    switch ($status_code) {
-      case '200':
-        // It works.
-        $this->loggerFactory->get('reqresimport')->info('Request to %url was successful.', ['%url' => $url]);
-        $fetched = json_decode((string) $request->getBody(), TRUE);
-        // Put the single retrieved record into an array so we can feed it to applyJsonData()
-        $data = $fetched['data'];
-        unset($fetched['data']);
-        $fetched['data'][] = $data;
-        $this->applyJsonData($fetched);
-        $response = 'User record, ' . $fetched['data'][0]['email'] . ' updated.';
-        // Set message to be displayed.
-        $this->messenger()->addMessage($response, 'status');
-        break;
-      
-      default:
-        $this->loggerFactory->get('reqresimport')->info('Request to %url was unsuccessful (status code: ' . $status_code . ').', ['%url' => $url]);
-        $response = 'No record returned. Invalid ID.';
-        // Set message to be displayed.
-        $this->messenger()->addMessage($response, 'error');
-        break;
-    }
-    
-    // Redirect back to admin view.
-    // @todo: Handle this URL better.
-    return new RedirectResponse('/reqresimport/imported-users');
-
   }
 
   /**
