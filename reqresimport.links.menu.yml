@@ -1,0 +1,23 @@
+
+# Reqres config forms page menu link defined
+reqresimport.reqres_parent_menu:
+  title: 'Reqres import config forms'
+  route_name: reqresimport.reqres_parent_menu
+  description: 'List of config forms for reqres import'
+  parent: system.admin_config_system
+  weight: 10
+  expanded: 1
+
+reqresimport.reqres_settings:
+  title: Reqres basic settings
+  description: Default settings for all things reqres
+  parent: reqresimport.reqres_parent_menu
+  route_name: reqresimport.reqres_settings
+  weight: 10
+
+reqresimport.reqres_test:
+  title: Reqres test form
+  description: A form where you can test the reqres API
+  parent: reqresimport.reqres_parent_menu
+  route_name: reqresimport.fetch_json_test
+  weight: 11

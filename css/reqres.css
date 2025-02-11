@@ -1,0 +1,33 @@
+.reqres-table {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.reqres-table th,
+.reqres-table td {
+  text-align: left;
+  padding-right: 0.5rem;
+}
+
+.reqres-pager,
+#pager-wrapper {
+  margin-top: 1rem;
+}
+
+.reqres-pager a.pager-link,
+#pager-wrapper a.pager-link {
+  display: inline-block;
+  padding: 0.5rem;
+  margin-right: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.reqres-pager a.pager-link:hover,
+.reqres-pager .is-active a.pager-link,
+#pager-wrapper a.pager-link:hover,
+#pager-wrapper .is-active a.pager-link {
+  background-color: #0073aa;
+  color: #fff;
+}

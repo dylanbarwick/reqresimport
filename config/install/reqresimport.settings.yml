@@ -1,0 +1,5 @@
+default_url: 'https://reqres.in'
+default_endpoint: '/api/users'
+default_parameter: 'page'
+default_parameter_value: '1'
+cron_interval: '3600'

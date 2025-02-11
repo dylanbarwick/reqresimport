@@ -1,0 +1,21 @@
+{
+    "name": "drupal/reqresimport",
+    "type": "drupal-custom-module",
+    "description": "Gets data from the reqres API",
+    "keywords": ["Drupal"],
+    "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    }
+  ],
+  "require": {
+    "composer/installers": "^1.2",
+    "drupal/core": "^8.9.0"
+  },
+  "extra": {
+    "installer-paths": {
+      "modules/custom/{$name}": ["type:drupal-custom-module"]
+    }
+  }
+}

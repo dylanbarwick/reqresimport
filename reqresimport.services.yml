@@ -1,0 +1,17 @@
+services:
+  reqresimport.utilities:
+    class: Drupal\reqresimport\Service\ReqresUtilities
+    arguments: ['@logger.factory', '@http_client', '@config.factory', '@messenger', '@reqresimport.client']
+
+  # Client factory service.
+  reqresimport.client_factory:
+    class: \Drupal\reqresimport\Service\ReqresApiClientFactory
+    arguments:
+      - '@config.factory'
+      - '@http_client_factory'
+      - '@serialization.json'
+
+  # Create a service from another Service Factory.
+  reqresimport.client:
+    class: \Drupal\reqresimport\Service\ReqresApiClient
+    factory: ['@reqresimport.client_factory', 'create']

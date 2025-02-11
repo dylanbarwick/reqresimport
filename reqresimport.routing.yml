@@ -1,0 +1,27 @@
+reqresimport.reqres_parent_menu:
+  path: '/admin/config/system/reqres-settings'
+  defaults:
+    _controller: '\Drupal\reqresimport\Controller\ReqresImportMenuController::reqresSettingsParentMenu'
+    _title: 'Reqres settings'
+  requirements:
+    _permission: 'administer site configuration'
+
+reqresimport.reqres_settings:
+  path: '/admin/config/system/reqres-settings/basic-settings'
+  defaults:
+    _title: 'Reqres basic settings'
+    _form: 'Drupal\reqresimport\Form\ReqresSettingsForm'
+  requirements:
+    _permission: 'administer site configuration'
+
+reqresimport.fetch_json_test:
+  path: '/reqresimport/fetch-json-test'
+  defaults:
+    _title: 'Fetch Json (test)'
+    _controller: '\Drupal\reqresimport\Controller\ReqresFetchJsonController'
+  requirements:
+    _permission: 'access content'
+  options:
+    parameters:
+      vars_from_fetchjson_form:
+        type: array

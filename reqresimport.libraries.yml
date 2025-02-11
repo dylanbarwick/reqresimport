@@ -1,0 +1,16 @@
+# A simple script using jquery ui accordion.
+reqres-styles:
+  css:
+    theme:
+      css/reqres.css: {}
+
+# We might need these later, depending on how the sub modules develop.
+
+# reqres-scripts:
+#   js:
+#     js/reqres.js: {}
+#   dependencies:
+#     - core/drupal
+#     - core/jquery
+#     - js_cookie/js-cookie
+#     - core/drupalSettings

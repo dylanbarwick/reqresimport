@@ -1,0 +1,5 @@
+name: 'reqres Import'
+type: module
+description: 'Import data from the reqres API'
+package: Reqres
+core_version_requirement: ^10 || ^11
