@@ -5,6 +5,8 @@ namespace Drupal\reqresimport\Service;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Http\ClientFactory;
+use Drupal\Core\Messenger\Messenger;
+use Drupal\Core\Messenger\MessengerInterface;
 
 /**
  * Class ReqresApiClientFactory.
@@ -35,14 +37,23 @@ class ReqresApiClientFactory {
   private $json;
 
   /**
+   * Messenger service.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  private $messenger;
+
+  /**
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    * @param \Drupal\Core\Http\ClientFactory $http_client_factory
    * @param \Drupal\Component\Serialization\Json $json
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    */
-  public function __construct(ConfigFactoryInterface $config_factory, ClientFactory $http_client_factory, Json $json) {
+  public function __construct(ConfigFactoryInterface $config_factory, ClientFactory $http_client_factory, Json $json, MessengerInterface $messenger) {
     $this->configFactory = $config_factory;
     $this->httpClientFactory = $http_client_factory;
     $this->json = $json;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -60,7 +71,7 @@ class ReqresApiClientFactory {
       ],
     ]);
 
-    return new ReqresApiClient($http_client, $this->json);
+    return new ReqresApiClient($http_client, $this->json, $this->messenger );
   }
 
 }

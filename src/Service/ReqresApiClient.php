@@ -3,7 +3,10 @@
 namespace Drupal\reqresimport\Service;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Messenger\Messenger;
 use GuzzleHttp\Client;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Messenger\MessengerTrait;
 
 /**
  * Class ReqresApiClient
@@ -11,6 +14,8 @@ use GuzzleHttp\Client;
  * @package Drupal\reqresimport\Service
  */
 class ReqresApiClient implements ReqresApiClientInterface {
+
+  use MessengerTrait;
 
   /**
    * Prepared instance of http client.
@@ -31,10 +36,13 @@ class ReqresApiClient implements ReqresApiClientInterface {
    *
    * @param \GuzzleHttp\Client $http_client
    * @param \Drupal\Component\Serialization\Json $json
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger service.
    */
-  public function __construct(Client $http_client, Json $json) {
+  public function __construct(Client $http_client, Json $json, MessengerInterface $messenger) {
     $this->httpClient = $http_client;
     $this->json = $json;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -45,12 +53,32 @@ class ReqresApiClient implements ReqresApiClientInterface {
       return [];
     }
 
-    $response = $this->httpClient->get($endpoint, [
-      'query' => $query,
-    ]);
+    // Wrap the httpClient->get in a try catch to prevent errors
+    // from bubbling up to the user.
+    try {
+      $response = $this->httpClient->get($endpoint, [
+        'query' => $query,
+      ]);
 
-    if ($response->getStatusCode() === 200) {
-      return $this->json::decode($response->getBody()->getContents());
+      // Switch statement to deal with different status codes.
+      switch ($response->getStatusCode()) {
+        case 200:
+          return $this->json::decode($response->getBody()->getContents());
+          break;
+        case 404:
+          $this->messenger()->addError('The endpoint was not found.');
+          break;
+        case 500:
+          $this->messenger()->addError('The server encountered an error.');
+          break;
+        default:
+          $this->messenger()->addError('An error occurred.');
+          break;
+      }
+    }
+    catch (\Exception $e) {
+      $this->messenger()->addError('An error occurred: <pre>' . $e->getMessage() . '</pre>');
+      return [];
     }
 
     return [];

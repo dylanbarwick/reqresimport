@@ -10,6 +10,7 @@ services:
       - '@config.factory'
       - '@http_client_factory'
       - '@serialization.json'
+      - '@messenger'
 
   # Create a service from another Service Factory.
   reqresimport.client:
