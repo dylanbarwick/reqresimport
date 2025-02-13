@@ -90,6 +90,10 @@ class ReqresUtilities implements ReqresUtilitiesInterface {
   /**
    * Sanitise array keys into header labels.
    *
+   * If the admin has not provided a custom label for a key, the key will be
+   * provided by reading the keys from the API, eg first_name, and made into
+   * more user-friendly versions, eg First Name.
+   *
    * @param array $keys
    *  The keys to sanitise into header labels.
    *
@@ -98,6 +102,7 @@ class ReqresUtilities implements ReqresUtilitiesInterface {
   public function sanitiseKeys(array $keys): array {
     $sanitised_keys = [];
     foreach ($keys as $key) {
+      // `id` will always be made `ID` instead of capitalised into `Id`.
       if ($key === 'id') {
         $sanitised_keys[$key] = 'ID';
       }

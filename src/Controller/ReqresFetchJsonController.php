@@ -8,6 +8,10 @@ use Drupal\Core\Controller\ControllerBase;
 
 /**
  * Returns responses for reqresimport routes.
+ *
+ * This controller is used to fetch JSON data from the `reqres.in` API
+ * and display it in a table. It is for the test form and table found
+ * at `/reqresimport/fetch-json-test`.
  */
 class ReqresFetchJsonController extends ControllerBase {
 
@@ -15,10 +19,14 @@ class ReqresFetchJsonController extends ControllerBase {
    * Builds the response.
    */
   public function __invoke($vars_from_fetchjson_form = NULL): array {
+    // Get the services...
     $reqres_getter = \Drupal::service('reqresimport.client');
     $json_utils = \Drupal::service('reqresimport.utilities');
+    // Retrieve default configuration values...
     $default_config = $json_utils->getDefaultConfig();
+    // Get the query parameters...
     $query_params = \Drupal::request()->query->all();
+    //...and fill in some blanks with defaults if there are non.
     if (empty($query_params['vars_from_fetchjson_form'])) {
       $vars_from_fetchjson_form = [
         'url' => $default_config['default_url'],
@@ -35,6 +43,7 @@ class ReqresFetchJsonController extends ControllerBase {
     $params = [
       $vars_from_fetchjson_form['parameter'] => $vars_from_fetchjson_form['parameter_value'],
     ];
+    // Retrievbe the JSON data from the API.
     $fetched_json = $reqres_getter->get($url, $params);
 
     $header_labels = [];

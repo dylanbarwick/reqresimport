@@ -1,7 +1,13 @@
 services:
+  # Utilities service.
   reqresimport.utilities:
     class: Drupal\reqresimport\Service\ReqresUtilities
     arguments: ['@logger.factory', '@http_client', '@config.factory', '@messenger', '@reqresimport.client']
+
+  # Table content service.
+  reqresimport.table_content_service_base:
+    class: Drupal\reqresimport\Service\TableContentServiceBase
+    arguments: ['@messenger', '@current_user', '@pager.manager']
 
   # Client factory service.
   reqresimport.client_factory:
